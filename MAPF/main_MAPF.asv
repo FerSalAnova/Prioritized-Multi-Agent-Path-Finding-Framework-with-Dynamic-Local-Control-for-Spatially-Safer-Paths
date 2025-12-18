@@ -1,0 +1,135 @@
+close all;
+clear;
+clc;
+M = 1000;
+
+maxRobots = 50;
+addpath(['.' filesep 'functions']);
+
+% --- Cargar mapa y escenarios (visualización opcional con 1500 pares) ---
+[B, robotPts] = load_map_and_scen('Paris_1_512.map', 'Paris_1_512.map.scen');
+
+% --- Seleccionar aleatoriamente maxRobots pares de start/goal ---
+nTotal = numel(robotPts);
+if maxRobots > nTotal
+    warning('maxRobots (%d) es mayor que los pares disponibles (%d). Se usarán todos.', ...
+            maxRobots, nTotal);
+    maxRobots = nTotal;
+end
+
+% Índices aleatorios únicos
+rng('shuffle');  % para variar cada ejecución
+selIdx = randperm(nTotal, maxRobots);
+
+% Nueva variable con los pares seleccionados
+selectedPts = robotPts(selIdx);
+
+fprintf('Seleccionados %d de %d pares de start/goal.\n', maxRobots, nTotal);
+
+
+
+% --- Topología completa (1 = obstáculo, 0 = libre) ---
+T = build_topology_from_B(B);   % T.adj (NxN, sparse), T.obstacles, T.free, T.size
+
+% --- Extraer índice de celdas libres ---
+fullAdj = T.adj;
+N = size(fullAdj, 1);
+
+if isfield(T, 'free') && ~isempty(T.free)
+    freeIdx = T.free(:);
+else
+    error('Wrong T structure!');
+end
+
+% --- Subgrafo solo sobre libres (disperso y binario) ---
+adj = fullAdj(freeIdx, freeIdx);
+adj = spones(adj);              % asegura 0/1
+adj = tril(adj, -1) + tril(adj, -1)';  % fuerza simetría (grafo no dirigido)
+
+% --- Construcción de la red de Petri a partir de la adyacencia sobre libres ---
+[Pre, Post] = construct_PN(adj);
+[nplaces,ntrans] = size(Pre);
+lb = sparse(ntrans,1);             % all zeros
+ub = inf(ntrans,1);                % all +Inf
+
+% invMap = zeros(N, 1);
+invMap(freeIdx) = 1:numel(freeIdx);
+% fwdMap(iReducido) = iOriginal (índice lineal en la malla HxW)
+fwdMap = freeIdx;
+
+fprintf(1,'Start solving the MAPF problem')
+nRobots = 1;
+cont = 1;
+paths = cell(1,maxRobots);
+times = zeros(1,maxRobots);
+trans_collisions={};
+Aeq1 = Post-Pre;
+%Aineq1 = Post;
+f1 = ones(1,ntrans);
+f2 = zeros(1,ntrans);
+time_limit = 1200;
+not_solved = [];
+collisions = [];
+%opt = optimoptions('intlinprog',...
+%    'Display','none',...
+%    'MaxTime',time_limit,...
+%    'LPPreprocess','basic');
+opt = optimoptions('linprog',...
+    'Display','none',...
+    'MaxTime',time_limit);
+traj_anterior = [];
+while nRobots <= maxRobots
+    [m0,mf,idxStart, idxGoal] = initial_marking(selectedPts{nRobots}, B, invMap, nplaces);
+    if ~isempty(traj_anterior)
+        temp = length(traj_anterior);
+        for j = 1 : temp-1
+            place = find(Post(:,traj_anterior(j))); %output place of transition temp(j)
+            trans = find(Post(place,:));%input transitions in outplace of temp(j)
+            for k = 1 : length(trans)
+                f1(trans(k)) = f1(trans(k)) + temp;
+            end
+        end
+    end
+    beq1 = sparse(mf-m0);
+
+    fprintf('\nStart solving LPP for robot %d!',nRobots);
+    tic;
+    [sol1,fval1,exitflag1] = intlinprog(f1,[],[],[],Aeq1,beq1,lb,ub,[],opt);
+    time_LP = toc;
+
+    if time_LP > time_limit
+        fprintf('Solving the LP problem takes more than %i seconds!\n',time_limit);
+        break;
+    else
+        if (exitflag1 ~= 1)
+            fprintf('Error solving first problem (not for time limit reasons)!\nLP exitflag:%d\n',exitflag1);
+            not_solved = [not_solved nRobots];
+            continue;
+        else
+            fprintf('\n LP problem solved for robot no %d in %s sec! \n',nRobots,num2str(time_LP));
+        end
+    end
+    [feasible_sigma, Rob_places, Rob_trans, ~] = sigma2trajectories(Pre,Post,m0,sol1,idxStart);
+    if ~feasible_sigma
+        error('Something happend when computing sigma! \n SOlution of LP is not integer???');
+    end
+    Tseq = Rob_trans{1};
+    if (fval1 > numel(Tseq))
+        fprintf(1,'Possible collision %d',length(collisions)+1);
+        collisions(end+1) = nRobots;
+        trans_collisions{numel(collisions)} = Tseq(f1(Tseq) > 1);
+    end
+    %    traj{nRobots} = Rob_trans{1};
+    traj_anterior = Rob_trans{1};
+    paths{nRobots} = Rob_places{1};
+    trans_to_final_place = find(Post(Rob_places{1}(end),:)); %transitions to the final place that should be inhibited
+    ub(trans_to_final_place) = 0;
+    times(nRobots) = time_LP;
+    nRobots = nRobots + 1;
+end
+
+sched_points = synchPaths(B, fwdMap, paths);
+
+plot_trajectories(B, sched_points,1,1)
+
+save("sim.mat","paths","times","not_solved","collisions","trans_collisions","Pre","Post");

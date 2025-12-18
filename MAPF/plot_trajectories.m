@@ -1,0 +1,83 @@
+function h = plot_trajectories(B, sched_points,ShowStartGoal,ShowNumbers)
+%PLOT_TRAJECTORIES  Dibuja las trayectorias sincronizadas de varios robots sobre el mapa B.
+%
+%   PLOT_TRAJECTORIES(B, sched_points) muestra todas las trayectorias
+%   almacenadas en sched_points{r} = [Ti x 2] (x,y por paso) encima del
+%   mapa binario B, llamando internamente a plot_map(B).
+%
+%   h = PLOT_TRAJECTORIES(...) devuelve una estructura con handles a los
+%   objetos gráficos creados.
+%
+%       'ShowStartGoal' : true | false  -> muestra círculos y triángulos (default=true)
+%       'ShowNumbers'   : true | false  -> etiqueta robots con su índice (default=false)
+%       'LineWidth'     : ancho de las trayectorias (default=1.5)
+%       'MarkerSize'    : tamaño de los marcadores (default=8)
+%       'Axes'          : handle de ejes existente (default=[] → crea uno nuevo)
+%
+%   Ejemplo:
+%       h = plot_trajectories(B, sched_points, 'ShowNumbers', true);
+%
+%   Entradas:
+%       B             : matriz binaria HxW (1=obstáculo, 0=libre, ya cartesiana).
+%       sched_points  : celda 1xR; cada {r} = [Ti x 2] (x,y) trayectoria sincronizada.
+%
+%   Salidas:
+%       h.fig   : handle de figura (si se creó)
+%       h.ax    : handle de ejes
+%       h.lines : handles de las líneas de trayectoria
+%       h.start : handles de marcadores de inicio
+%       h.goal  : handles de marcadores de fin
+%
+%   Autor: (tu nombre) - (fecha)
+
+lw=2;
+ms=8;
+showSG = ShowStartGoal;
+showNum = ShowNumbers;
+h = plot_map(B);
+ax = h.ax;
+hold on;
+
+% ------------------ Dibujar trayectorias ------------------
+R = numel(sched_points);
+C = lines(R);  % paleta de colores
+h.lines = gobjects(1, R);
+h.start = gobjects(1, R);
+h.goal  = gobjects(1, R);
+h.labels = gobjects(1, R);
+
+for r = 1:R
+    P = sched_points{r};
+    if isempty(P), continue; end
+
+    % Línea de trayectoria
+    h.lines(r) = plot(ax, P(:,1), P(:,2), '-', ...
+        'Color', C(r,:), 'LineWidth', lw);
+
+    % Puntos inicial y final
+    if showSG
+        p0 = P(1,:);   % inicio
+        pf = P(end,:); % fin
+        h.start(r) = plot(ax, p0(1), p0(2), 'o', ...
+            'MarkerSize', ms, 'MarkerEdgeColor', C(r,:), 'MarkerFaceColor', 'none');
+        h.goal(r) = plot(ax, pf(1), pf(2), '^', ...
+            'MarkerSize', ms, 'MarkerEdgeColor', C(r,:), 'MarkerFaceColor', 'none');
+    end
+
+    % Etiqueta opcional con número de robot
+    if showNum
+        text(ax, P(1,1), P(1,2), sprintf('  R%d', r), ...
+            'Color', C(r,:), 'FontWeight','bold', ...
+            'VerticalAlignment','bottom', 'FontSize',9);
+    end
+end
+
+title(ax, sprintf('Trajectories of %d robots', R));
+xlabel(ax, 'x'); ylabel(ax, 'y');
+axis(ax, 'equal');
+hold(ax, 'off');
+
+% ------------------ Salida de handles ------------------
+h.ax = ax;
+hold off;
+end
