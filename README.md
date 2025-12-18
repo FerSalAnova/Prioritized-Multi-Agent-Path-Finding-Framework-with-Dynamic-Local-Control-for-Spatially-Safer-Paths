@@ -33,7 +33,7 @@ This framework introduces a **hybrid architecture** that minimizes temporal depe
 ### Installation
 
 ```bash
-git clone ...
+git clone https://github.com/FerSalAnova/Prioritized-Multi-Agent-Path-Finding-Framework-with-Dynamic-Local-Control-for-Spatially-Safer-Paths.git
 cd Prioritized-Multi-Agent-Path-Finding-Framework-with-Dynamic-Local-Control-for-Spatially-Safer-Paths
 ```
 
@@ -42,6 +42,37 @@ Execute in Matlab.
 
 ## Results
 
+We compareed our results in multiple scenarios to different SOTA methods:
+
+### Large-Scale Coordination (Paris Map)
+
+Navigating a 256×256 open environment.  
+The geometric cost inflation mechanism successfully resolves conflicts spatially with minimal waiting.
+
+![Paris 500 Agents](assets/ParisRes.png)
+
+---
+
+### Bottleneck Resolution (Room Map)
+
+In constrained environments with heavy bottlenecks, agents proactively detour around future conflicts instead of relying on temporal waits.
+
+![Room Bottleneck](assets/RoomRes.png)
+
+---
+
+### Dense Random Environment
+
+Performance in a 32×32 grid with 20% random obstacles, highlighting robustness under erratic geometries.
+
+![Random Map](assets/RandomRes.png)
+
+---
+
+### Video Demonstration
+
+**Full simulation video (1,000 agents):**  
+[Click here to watch the video](assets/Paris-1000.mp4)
 
 
 
