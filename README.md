@@ -49,7 +49,7 @@ We compareed our results in multiple scenarios to different SOTA methods (CA* / 
 Navigating a 256×256 open environment.  
 The geometric cost inflation mechanism successfully resolves conflicts spatially with minimal waiting.
 
-![Paris 500 Agents](assets/ParisRes.png)
+![Paris](assets/ParisRes.png)
 
 ---
 
@@ -57,7 +57,7 @@ The geometric cost inflation mechanism successfully resolves conflicts spatially
 
 In constrained environments with heavy bottlenecks, agents proactively detour around future conflicts instead of relying on temporal waits.
 
-![Room Bottleneck](assets/RoomRes.png)
+![Room](assets/RoomRest.png)
 
 ---
 
@@ -65,14 +65,14 @@ In constrained environments with heavy bottlenecks, agents proactively detour ar
 
 Performance in a 32×32 grid with 20% random obstacles, highlighting robustness under erratic geometries.
 
-![Random Map](assets/RandomRes.png)
+![Random](assets/RandomRes.png)
 
 ---
 
 ### Video Demonstration
 
 **Full simulation video (100 agents):**  
-[Click here to watch the video](assets/Paris.mp4)
+[Click here to watch the video](assets/Paris_video.webm)
 
 
 
