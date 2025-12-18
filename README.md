@@ -34,7 +34,13 @@ This framework introduces a **hybrid architecture** that minimizes temporal depe
 
 ```bash
 git clone ...
-cd Prioritized-Multi-Agent-Path-Finding-Framework-with-Dynamic-Local-Control-for-Spatially-Safer-Pathsç
+cd Prioritized-Multi-Agent-Path-Finding-Framework-with-Dynamic-Local-Control-for-Spatially-Safer-Paths
+```
+
+Open main in Matlab and select Priority policy, map and number of agents.
+Execute in Matlab.
+
+## Results
 
 
 
