@@ -1,0 +1,2 @@
+# Prioritized-Multi-Agent-Path-Finding-Framework-with-Dynamic-Local-Control-for-Spatially-Safer-Paths
+This repository contains the implementation of a sub-optimal and scalable Multi Agent Path finding method. This method dynamically assigns cost to the nodes to produce spatially safer past without the need of modelling discrete time, reducing the synchronization overhead at each timestep, reducing SoC and being fast and highly scalable.
