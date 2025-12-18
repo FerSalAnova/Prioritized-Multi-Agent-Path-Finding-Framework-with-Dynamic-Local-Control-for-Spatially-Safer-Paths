@@ -42,7 +42,7 @@ Execute in Matlab.
 
 ## Results
 
-We compareed our results in multiple scenarios to different SOTA methods:
+We compareed our results in multiple scenarios to different SOTA methods (CA* / PIBT / ECBS):
 
 ### Large-Scale Coordination (Paris Map)
 
@@ -71,8 +71,8 @@ Performance in a 32×32 grid with 20% random obstacles, highlighting robustness 
 
 ### Video Demonstration
 
-**Full simulation video (1,000 agents):**  
-[Click here to watch the video](assets/Paris-1000.mp4)
+**Full simulation video (100 agents):**  
+[Click here to watch the video](assets/Paris.mp4)
 
 
 
