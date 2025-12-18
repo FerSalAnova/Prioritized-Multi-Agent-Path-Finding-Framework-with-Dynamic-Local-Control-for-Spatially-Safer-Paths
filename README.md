@@ -71,9 +71,8 @@ Performance in a 32×32 grid with 20% random obstacles, highlighting robustness 
 
 ### Video Demonstration
 
-**Full simulation video (100 agents):**  
-[Video Execution](assets/Paris_video.mp4)
-
+**Simulation video demo (100 agents):**  
+[![Hybrid MAPF Demo](assets/Paris_video.gif)]
 
 
 
